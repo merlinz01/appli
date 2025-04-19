@@ -1,0 +1,47 @@
+inputs:
+  test_parameter:
+    type: str
+    required: True
+
+steps:
+  - id: install_go
+    name: Install Go
+    do: GoInstalled
+    if: false
+    with:
+      version: 1.24.0
+
+  - id: source
+    name: Pull source code
+    do: GitRepoPulled
+    if: steps.go.changed.foo.bar
+    with:
+      source: https://github.com/some/server
+      path: /srv
+
+  - id: build
+    name: Build server
+    run: go build ./cmd/server
+    with:
+      cwd: /srv
+    if: |
+      steps.go.changed
+      or (
+        steps.source.changed
+        and run('bash', '/srv/scripts/needs-rebuilt.sh').succeeded
+      )
+
+  - id: service_file
+    name: Install service file
+    do: FileInstalled
+    with:
+      path: /etc/systemd/system/dummy.service
+      method: contents
+      source: |
+        # This is a dummy service file
+
+  - name: Start service
+    do: ServiceRunning
+    with:
+      service: server
+      restart-if: steps.service_file.changed or steps.build.changed

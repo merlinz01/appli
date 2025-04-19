@@ -1,0 +1,35 @@
+inputs:
+  python-version:
+    description: "The version of Python to install"
+    type: str
+    required: false
+    default: latest
+
+outputs:
+  go-version:
+    description: "The version of Go that is installed"
+    type: str
+
+steps:
+  - name: Install Go
+    id: go
+    do: GoInstalled
+    if: run('go version').output == 'go version go1.24.0'
+    with:
+      version: latest
+  - name: Install Git
+    id: git
+    do: PackageInstalled
+    if: steps.go.succeeded
+    with:
+      name: git
+  - name: Install Python
+    id: python_installed
+    run: apt-get install -y python3 python3-pip
+    if: platform == 'win32'
+    with:
+      name: python3
+  - name: Run another job
+    job: install
+    with:
+      test_parameter: 123

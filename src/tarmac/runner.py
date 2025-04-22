@@ -110,13 +110,9 @@ class Runner:
         outputs["succeeded"] = True
         outputs["steps"] = {}
         for step in metadata.steps:
-            if step.condition is not None and not self.evaluate_condition(
-                step.condition, inputs, outputs
-            ):
-                continue
-            out = self.execute_workflow_step(step, inputs)
-            outputs["steps"][step.id] = out
-            if not out.get("succeeded", True):
+            out = self.execute_workflow_step(step, inputs, outputs)
+            succeeded = out.get("succeeded", True)
+            if succeeded is not None and not succeeded:
                 outputs["succeeded"] = False
                 break
         return outputs
@@ -140,9 +136,13 @@ class Runner:
         }
 
     def execute_workflow_step(
-        self, step: WorkflowStep, inputs: ValueMapping
+        self, step: WorkflowStep, inputs: ValueMapping, outputs: ValueMapping
     ) -> ValueMapping:
-        if step.type == "script":
+        if step.condition is not None and not self.evaluate_condition(
+            step.condition, inputs, outputs
+        ):
+            out = {"succeeded": None}
+        elif step.type == "script":
             assert step.do is not None
             out = self.execute_script(step.do, step.params)
         elif step.type == "workflow":
@@ -153,6 +153,10 @@ class Runner:
             out = self.execute_shell(step.run, step.params)
         else:
             raise ValueError("unknown step type")
+        assert isinstance(outputs["steps"], dict)
+        assert step.id is not None
+        outputs["steps"][step.id] = out
+        self.workflow_step_hook(step, out)
         return out
 
     def _run_command(self, cmd: str, **params) -> ValueMapping:
@@ -175,3 +179,11 @@ class Runner:
         }
         code = compile(f"({cond})", "<condition>", "eval")
         return bool(eval(code, env, {}))
+
+    def workflow_step_hook(self, step: WorkflowStep, outputs: ValueMapping) -> None:
+        """
+        This method is called after each workflow step is executed.
+        It can be used by subclasses to perform additional actions, such as logging or
+        notifying the user.
+        """
+        logger.info(f"Step {step.id} executed with outputs: {outputs}")

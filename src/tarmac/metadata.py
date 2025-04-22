@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterator, Self, TypeAlias, Literal
+from typing import Any, Iterator, Self, TypeAlias, Literal, Mapping
 
 import yaml
 from pydantic import BaseModel, Field
@@ -19,8 +19,8 @@ def _metadata_stream(script: str) -> Iterator[tuple[str, str]]:
 
 
 IOTypeString: TypeAlias = Literal["str", "int", "float", "bool", "list", "dict"]
-IOType: TypeAlias = str | int | float | bool | list[Any] | dict[str, Any] | None
-ValueMapping: TypeAlias = dict[str, IOType]
+IOType: TypeAlias = Any
+ValueMapping: TypeAlias = Mapping[str, IOType]
 
 
 class Input(BaseModel):

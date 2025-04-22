@@ -4,6 +4,10 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+### Added
+
+- Add workflow step hook to runner
+
 ### Changed
 
 - Cache `uv` command path in runner

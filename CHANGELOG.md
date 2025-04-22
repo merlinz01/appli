@@ -2,7 +2,7 @@
 
 This is the changelog for Tarmac.
 
-## [Unreleased]
+## 0.1.3
 
 ## Changed
 

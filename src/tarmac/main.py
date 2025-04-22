@@ -1,6 +1,7 @@
 import argparse
-import yaml
+import os
 import logging
+import yaml
 
 from .runner import Runner
 
@@ -10,6 +11,12 @@ def main(args=None):
 
     parser = argparse.ArgumentParser(description="Execute a script with inputs")
     parser.add_argument("job", type=str, help="The job to execute")
+    parser.add_argument(
+        "-b",
+        "--base-path",
+        type=str,
+        help="The path to the workspace containing the scripts and inputs",
+    )
     parser.add_argument(
         "-i",
         "--inputs",
@@ -26,7 +33,11 @@ def main(args=None):
             key, value = input_.split("=")
             inputs[key] = value
 
-    runner = Runner(base_path="example")
+    runner = Runner(
+        base_path=args.base_path
+        or os.environ.get("TARMAC_BASE_PATH", "")
+        or os.getcwd()
+    )
     result = runner.execute_job(args.job, inputs)
     print()
     print(yaml.dump(result, indent=2))

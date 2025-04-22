@@ -12,37 +12,6 @@ wheels = [
 ]
 
 [[package]]
-name = "tarmac"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "dotmap" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-    { name = "uv" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "dotmap", specifier = ">=1.3.30" },
-    { name = "pydantic", specifier = ">=2.10.6" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
-    { name = "uv", specifier = ">=0.6.10" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8.3.5" },
-    { name = "ruff", specifier = ">=0.11.6" },
-]
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -204,6 +173,37 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/6f/4c/1cd5a84a412d3626335ae69f5f9de2bb554eea0faf46deb1f0cb48534042/ruff-0.11.6-py3-none-win32.whl", hash = "sha256:5151a871554be3036cd6e51d0ec6eef56334d74dfe1702de717a995ee3d5b287", size = 10485900 },
     { url = "https://files.pythonhosted.org/packages/42/46/8997872bc44d43df986491c18d4418f1caff03bc47b7f381261d62c23442/ruff-0.11.6-py3-none-win_amd64.whl", hash = "sha256:cce85721d09c51f3b782c331b0abd07e9d7d5f775840379c640606d3159cae0e", size = 11558592 },
     { url = "https://files.pythonhosted.org/packages/d7/6a/65fecd51a9ca19e1477c3879a7fda24f8904174d1275b419422ac00f6eee/ruff-0.11.6-py3-none-win_arm64.whl", hash = "sha256:3567ba0d07fb170b1b48d944715e3294b77f5b7679e8ba258199a250383ccb79", size = 10682766 },
+]
+
+[[package]]
+name = "tarmac"
+version = "0.1.3"
+source = { editable = "." }
+dependencies = [
+    { name = "dotmap" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "uv" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "dotmap", specifier = ">=1.3.30" },
+    { name = "pydantic", specifier = ">=2.10.6" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "uv", specifier = ">=0.6.10" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.3.5" },
+    { name = "ruff", specifier = ">=0.11.6" },
 ]
 
 [[package]]

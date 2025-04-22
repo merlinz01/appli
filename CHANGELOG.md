@@ -2,6 +2,12 @@
 
 This is the changelog for Tarmac.
 
+## [Unreleased]
+
+## Changed
+
+- Add build artifacts to release assets
+
 ## 0.1.2
 
 ### Fixed

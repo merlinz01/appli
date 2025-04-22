@@ -11,7 +11,7 @@ def test_load_script_metadata() -> None:
 # ]
 # ///
 
-# /// redpepper
+# /// tarmac
 # description: |
 #   This is the description.
 #   It can be multi-line.

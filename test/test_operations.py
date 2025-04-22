@@ -2,9 +2,6 @@ from pathlib import Path
 
 
 def test_run_operation(config_dir: Path):
-    """
-    Test the run function in the operations module.
-    """
     import json
     import os
     from tarmac.operations import run, OperationInterface

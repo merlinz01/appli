@@ -193,7 +193,7 @@ class ScriptMetadata(Metadata):
                 metadata = yaml.safe_load(content)
                 break
         if metadata is None:
-            raise ValueError("No metadata found")
+            metadata = {}
         return cls(**metadata)
 
 
@@ -279,7 +279,7 @@ class JobMetadata(Metadata):
     Metadata for a job.
     """
 
-    steps: list[JobStep]
+    steps: list[JobStep] = Field(default_factory=list)
     """
     A list of job steps.
     The steps are executed in order.
@@ -288,4 +288,6 @@ class JobMetadata(Metadata):
     @classmethod
     def load(cls, file: str) -> Self:
         metadata = yaml.safe_load(file)
+        if metadata is None:
+            metadata = {}
         return cls(**metadata)

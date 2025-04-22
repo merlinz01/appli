@@ -2,6 +2,12 @@
 
 This is the changelog for Tarmac.
 
+## [Unreleased]
+
+### Fixed
+
+- Improve release CI workflow
+
 ## 0.1.1
 
 ### Added

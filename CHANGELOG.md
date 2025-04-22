@@ -4,6 +4,8 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+## [0.1.4]
+
 ### Changed
 
 - Ignore missing script and job metadata

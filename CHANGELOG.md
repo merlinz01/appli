@@ -7,6 +7,7 @@ This is the changelog for Tarmac.
 ### Added
 
 - Add workflow step hook to runner
+- Add `python` workflow step type
 
 ### Changed
 

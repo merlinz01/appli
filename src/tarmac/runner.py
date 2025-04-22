@@ -5,10 +5,11 @@ import sys
 import tempfile
 from uv import find_uv_bin
 from .metadata import ScriptMetadata, WorkflowMetadata, ValueMapping, WorkflowStep
-from logging import getLogger
+import logging
 import dotmap
+import traceback
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Runner:
@@ -96,6 +97,34 @@ class Runner:
                 outputs.setdefault("succeeded", True)
             return outputs
 
+    def execute_shell(self, script: str, inputs: ValueMapping) -> ValueMapping:
+        p = subprocess.Popen(
+            script,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        stdout, stderr = p.communicate()
+        return {
+            "output": stdout,
+            "error": stderr,
+            "returncode": p.returncode,
+            "succeeded": p.returncode == 0,
+        }
+
+    def execute_python(self, script: str, inputs: ValueMapping) -> ValueMapping:
+        env = {"inputs": inputs, "outputs": {}}
+        try:
+            exec(script, env)
+        except BaseException:
+            return {"succeeded": False, "error": traceback.format_exc()}
+        out: dict = env.get("outputs", {})
+        out.setdefault("succeeded", True)
+        return out
+
     def execute_workflow(self, name: str, inputs: ValueMapping) -> ValueMapping:
         filename = self._get_workflow_filename(name)
         try:
@@ -117,24 +146,6 @@ class Runner:
                 break
         return outputs
 
-    def execute_shell(self, script: str, inputs: ValueMapping) -> ValueMapping:
-        p = subprocess.Popen(
-            script,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
-        stdout, stderr = p.communicate()
-        return {
-            "output": stdout,
-            "error": stderr,
-            "returncode": p.returncode,
-            "succeeded": p.returncode == 0,
-        }
-
     def execute_workflow_step(
         self, step: WorkflowStep, inputs: ValueMapping, outputs: ValueMapping
     ) -> ValueMapping:
@@ -145,12 +156,15 @@ class Runner:
         elif step.type == "script":
             assert step.do is not None
             out = self.execute_script(step.do, step.params)
-        elif step.type == "workflow":
-            assert step.workflow is not None
-            out = self.execute_workflow(step.workflow, step.params)
         elif step.type == "shell":
             assert step.run is not None
             out = self.execute_shell(step.run, step.params)
+        elif step.type == "python":
+            assert step.py is not None
+            out = self.execute_python(step.py, step.params)
+        elif step.type == "workflow":
+            assert step.workflow is not None
+            out = self.execute_workflow(step.workflow, step.params)
         else:
             raise ValueError("unknown step type")
         assert isinstance(outputs["steps"], dict)

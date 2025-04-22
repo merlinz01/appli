@@ -197,7 +197,7 @@ class ScriptMetadata(Metadata):
         return cls(**metadata)
 
 
-WorkflowType: TypeAlias = Literal["script", "workflow", "shell"]
+WorkflowType: TypeAlias = Literal["script", "shell", "python", "workflow"]
 
 
 class WorkflowStep(BaseModel):
@@ -235,6 +235,12 @@ class WorkflowStep(BaseModel):
     If provided, the type will be set to "shell".
     """
 
+    py: str | None = None
+    """
+    The Python script to run.
+    If provided, the type will be set to "script".
+    """
+
     workflow: str | None = None
     """
     The workflow to run.
@@ -263,15 +269,23 @@ class WorkflowStep(BaseModel):
                 raise ValueError("Cannot use `run` with `do`")
             if self.workflow is not None:
                 raise ValueError("Cannot use `workflow` with `do`")
+            if self.py is not None:
+                raise ValueError("Cannot use `py` with `do`")
             self.type = "script"
         elif self.run is not None:
             if self.workflow is not None:
                 raise ValueError("Cannot use `workflow` with `run`")
+            if self.py is not None:
+                raise ValueError("Cannot use `py` with `run`")
             self.type = "shell"
+        elif self.py is not None:
+            if self.workflow is not None:
+                raise ValueError("Cannot use `workflow` with `py`")
+            self.type = "python"
         elif self.workflow is not None:
             self.type = "workflow"
         else:
-            raise ValueError("Must have either `do` or `run` or `workflow`")
+            raise ValueError("Must have either `do`, `run`, `py`, or `workflow`")
 
 
 class WorkflowMetadata(Metadata):

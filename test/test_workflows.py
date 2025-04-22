@@ -66,6 +66,33 @@ run(MyOperation)
     }
 
 
+def test_workflow_step_python_type(config_dir: Path):
+    from tarmac.runner import Runner
+
+    runner = Runner(base_path=str(config_dir))
+    (config_dir / "workflows").mkdir()
+    with open(config_dir / "workflows" / "workflow.yml", "w") as f:
+        f.write(
+            """
+            steps:
+              - name: step1
+                py: outputs['test'] = inputs['input']
+                with:
+                    input: "Hello, World!"
+            """
+        )
+    outputs = runner.execute_workflow("workflow", {})
+    assert outputs == {
+        "steps": {
+            "step1": {
+                "succeeded": True,
+                "test": "Hello, World!",
+            }
+        },
+        "succeeded": True,
+    }
+
+
 def test_workflow_step_workflow_type(config_dir: Path):
     from tarmac.runner import Runner
 

@@ -4,13 +4,17 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
-## Changed
+### Changed
 
 - Ignore missing script and job metadata
 
+### Fixed
+
+- Improve handling of corrupted outputs file
+
 ## 0.1.3
 
-## Changed
+### Changed
 
 - Add build artifacts to release assets
 

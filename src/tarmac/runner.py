@@ -33,8 +33,8 @@ class Runner:
             raise ValueError(f"script {name} not found") from e
         inputs = metadata.validate_inputs(inputs)
         with (
-            tempfile.NamedTemporaryFile(mode="w") as inputs_file,
-            tempfile.NamedTemporaryFile(mode="r") as outputs_file,
+            tempfile.NamedTemporaryFile(mode="wb") as inputs_file,
+            tempfile.NamedTemporaryFile(mode="w+b") as outputs_file,
         ):
             cmd = [
                 self.find_uv_bin(),
@@ -45,7 +45,6 @@ class Runner:
                 "--no-config",
                 "--no-project",
                 "--no-env-file",
-                "--locked",
                 "--with",
                 "tarmac",
                 "--script",
@@ -54,9 +53,11 @@ class Runner:
             cmd.append(filename)
             os.chmod(inputs_file.name, 0o600)
             os.chmod(outputs_file.name, 0o600)
-            inputs_file.write(json.dumps(inputs))
+            inputs_file.write(json.dumps(inputs).encode("utf-8"))
             inputs_file.flush()
             inputs_file.seek(0)
+            outputs_file.write(b"{}")
+            outputs_file.flush()
             env = os.environ.copy()
             env["TARMAC_INPUTS_FILE"] = inputs_file.name
             env["TARMAC_OUTPUTS_FILE"] = outputs_file.name
@@ -69,21 +70,27 @@ class Runner:
                 text=True,
             )
             stdout, stderr = p.communicate()
+            try:
+                outputs_file.seek(0)
+                outputs = json.load(outputs_file.file)
+            except json.JSONDecodeError:
+                logger.warning("Failed to decode JSON from outputs file")
+                outputs = {
+                    "succeeded": False,
+                    "error": "Failed to decode JSON from outputs file",
+                }
             if p.returncode != 0:
-                outputs = {}
-                outputs["succeeded"] = False
                 if stdout:
                     outputs["output"] = stdout
                 if stderr:
                     outputs["error"] = stderr
-                outputs["returncode"] = p.returncode
-                return outputs
-            outputs_file.seek(0)
-            outputs: ValueMapping = json.load(outputs_file)
-            if stdout:
-                outputs.setdefault("output", stdout)
-            if stderr:
-                outputs.setdefault("error", stderr)
+                outputs["succeeded"] = False
+            else:
+                if stdout:
+                    outputs.setdefault("output", stdout)
+                if stderr:
+                    outputs.setdefault("error", stderr)
+                outputs.setdefault("succeeded", True)
             return outputs
 
     def execute_job(self, name: str, inputs: ValueMapping) -> ValueMapping:

@@ -4,6 +4,8 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+## [0.1.5]
+
 - Unify workflow terminology
 
 ## [0.1.4]

@@ -1,6 +1,6 @@
 [project]
 name = "tarmac"
-version = "0.1.4"
+version = "0.1.5"
 description = "Reliable deployments, repeatable workflows"
 readme = "README.md"
 requires-python = ">=3.12"

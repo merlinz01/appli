@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def test_run_operation(config_dir: Path) -> None:
+def test_run_operation(config_dir: Path):
     """
     Test the run function in the operations module.
     """

@@ -4,11 +4,13 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+- Unify workflow terminology
+
 ## [0.1.4]
 
 ### Changed
 
-- Ignore missing script and job metadata
+- Ignore missing script and workflow metadata
 
 ### Fixed
 

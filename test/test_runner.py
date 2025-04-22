@@ -1,24 +1,24 @@
 from pathlib import Path
 
 
-def test_create_runner(config_dir: Path) -> None:
+def test_create_runner(config_dir: Path):
     from tarmac.runner import Runner
 
     Runner(base_path=str(config_dir))
 
 
-def test_run_empty_workflow(config_dir: Path) -> None:
+def test_run_empty_workflow(config_dir: Path):
     from tarmac.runner import Runner
 
     runner = Runner(base_path=str(config_dir))
-    (config_dir / "jobs").mkdir()
-    with open(config_dir / "jobs" / "empty.yml", "w") as f:
+    (config_dir / "workflows").mkdir()
+    with open(config_dir / "workflows" / "empty.yml", "w") as f:
         f.write("")
-    outputs = runner.execute_job("empty", {})
+    outputs = runner.execute_workflow("empty", {})
     assert outputs == {"steps": {}, "succeeded": True}
 
 
-def test_run_empty_script(config_dir: Path) -> None:
+def test_run_empty_script(config_dir: Path):
     from tarmac.runner import Runner
 
     runner = Runner(base_path=str(config_dir))

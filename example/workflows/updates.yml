@@ -29,7 +29,7 @@ steps:
     if: platform == 'win32'
     with:
       name: python3
-  - name: Run another job
-    job: install
+  - name: Run another workflow
+    workflow: install
     with:
       test_parameter: 123

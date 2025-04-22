@@ -4,7 +4,7 @@ import subprocess
 import sys
 import tempfile
 from uv import find_uv_bin
-from .metadata import ScriptMetadata, JobMetadata, ValueMapping, JobStep
+from .metadata import ScriptMetadata, WorkflowMetadata, ValueMapping, WorkflowStep
 from logging import getLogger
 import dotmap
 
@@ -18,8 +18,8 @@ class Runner:
     def find_uv_bin(self):
         return find_uv_bin()
 
-    def _get_job_filename(self, name: str) -> str:
-        return os.path.join(self.base_path, "jobs", name + ".yml")
+    def _get_workflow_filename(self, name: str) -> str:
+        return os.path.join(self.base_path, "workflows", name + ".yml")
 
     def _get_script_filename(self, name: str) -> str:
         return os.path.join(self.base_path, "scripts", name + ".py")
@@ -93,16 +93,16 @@ class Runner:
                 outputs.setdefault("succeeded", True)
             return outputs
 
-    def execute_job(self, name: str, inputs: ValueMapping) -> ValueMapping:
-        filename = self._get_job_filename(name)
+    def execute_workflow(self, name: str, inputs: ValueMapping) -> ValueMapping:
+        filename = self._get_workflow_filename(name)
         try:
             with open(filename) as f:
-                metadata = JobMetadata.load(f.read())
+                metadata = WorkflowMetadata.load(f.read())
         except FileNotFoundError as e:
-            raise ValueError(f"job {name} not found") from e
+            raise ValueError(f"Workflow {name} not found") from e
         inputs = metadata.validate_inputs(inputs)
         for step in metadata.steps:
-            step.validate_job_type()
+            step.validate_workflow_type()
         outputs = {}
         outputs["succeeded"] = True
         outputs["steps"] = {}
@@ -111,7 +111,7 @@ class Runner:
                 step.condition, inputs, outputs
             ):
                 continue
-            out = self.execute_job_step(step, inputs)
+            out = self.execute_workflow_step(step, inputs)
             outputs["steps"][step.id] = out
             if not out.get("succeeded", True):
                 outputs["succeeded"] = False
@@ -136,13 +136,15 @@ class Runner:
             "succeeded": p.returncode == 0,
         }
 
-    def execute_job_step(self, step: JobStep, inputs: ValueMapping) -> ValueMapping:
+    def execute_workflow_step(
+        self, step: WorkflowStep, inputs: ValueMapping
+    ) -> ValueMapping:
         if step.type == "script":
             assert step.do is not None
             out = self.execute_script(step.do, step.params)
-        elif step.type == "job":
-            assert step.job is not None
-            out = self.execute_job(step.job, step.params)
+        elif step.type == "workflow":
+            assert step.workflow is not None
+            out = self.execute_workflow(step.workflow, step.params)
         elif step.type == "shell":
             assert step.run is not None
             out = self.execute_shell(step.run, step.params)

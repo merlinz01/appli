@@ -25,7 +25,7 @@ ValueMapping: TypeAlias = dict[str, IOType]
 
 class Input(BaseModel):
     """
-    Describes an input for a job step.
+    Describes an input for a workflow step.
     """
 
     name: str = ""
@@ -66,7 +66,7 @@ class Input(BaseModel):
 
 class Output(BaseModel):
     """
-    Describes an output for a job step.
+    Describes an output for a workflow step.
     """
 
     name: str = ""
@@ -197,30 +197,30 @@ class ScriptMetadata(Metadata):
         return cls(**metadata)
 
 
-JobType: TypeAlias = Literal["script", "job", "shell"]
+WorkflowType: TypeAlias = Literal["script", "workflow", "shell"]
 
 
-class JobStep(BaseModel):
+class WorkflowStep(BaseModel):
     """
-    Describes a job step.
+    Describes a workflow step.
     """
 
     id: str | None = None
     """
-    The ID of the job step.
-    If not provided, the ID will be set to the name of the job step.
+    The ID of the workflow step.
+    If not provided, the ID will be set to the name of the workflow step.
     """
 
-    type: JobType | None = None
+    type: WorkflowType | None = None
     """
-    The type of the job step.
-    Can be one of: script, job, shell.
-    If not provided, the type will be set based on the presence of the `do`, `run`, or `job` fields.
+    The type of the workflow step.
+    Can be one of: script, workflow, shell.
+    If not provided, the type will be set based on the presence of the `do`, `run`, or `workflow` fields.
     """
 
     name: str = ""
     """
-    The human-readable name of the job step.
+    The human-readable name of the workflow step.
     """
 
     do: str | None = None
@@ -235,21 +235,21 @@ class JobStep(BaseModel):
     If provided, the type will be set to "shell".
     """
 
-    job: str | None = None
+    workflow: str | None = None
     """
-    The job to run.
-    If provided, the type will be set to "job".
+    The workflow to run.
+    If provided, the type will be set to "workflow".
     """
 
     params: ValueMapping = Field(alias="with", default_factory=dict)
     """
-    The inputs to pass to the job step.
+    The inputs to pass to the workflow step.
     """
 
     condition: Any = Field(alias="if", default=None)
     """
-    The condition to run the job step.
-    If provided, the job step will only run if the condition is true.
+    The condition to run the workflow step.
+    If provided, the workflow step will only run if the condition is true.
     """
 
     def __init__(self, *args, **kw):
@@ -257,31 +257,31 @@ class JobStep(BaseModel):
         if not self.id:
             self.id = self.name
 
-    def validate_job_type(self):
+    def validate_workflow_type(self):
         if self.do is not None:
             if self.run is not None:
                 raise ValueError("Cannot use `run` with `do`")
-            if self.job is not None:
-                raise ValueError("Cannot use `job` with `do`")
+            if self.workflow is not None:
+                raise ValueError("Cannot use `workflow` with `do`")
             self.type = "script"
         elif self.run is not None:
-            if self.job is not None:
-                raise ValueError("Cannot use `job` with `run`")
+            if self.workflow is not None:
+                raise ValueError("Cannot use `workflow` with `run`")
             self.type = "shell"
-        elif self.job is not None:
-            self.type = "job"
+        elif self.workflow is not None:
+            self.type = "workflow"
         else:
-            raise ValueError("Must have either `do` or `run` or `job`")
+            raise ValueError("Must have either `do` or `run` or `workflow`")
 
 
-class JobMetadata(Metadata):
+class WorkflowMetadata(Metadata):
     """
-    Metadata for a job.
+    Metadata for a workflow.
     """
 
-    steps: list[JobStep] = Field(default_factory=list)
+    steps: list[WorkflowStep] = Field(default_factory=list)
     """
-    A list of job steps.
+    A list of workflow steps.
     The steps are executed in order.
     """
 

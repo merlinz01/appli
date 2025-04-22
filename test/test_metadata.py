@@ -1,4 +1,4 @@
-def test_load_script_metadata() -> None:
+def test_load_script_metadata():
     from tarmac.metadata import ScriptMetadata
 
     script = """#!/usr/bin/env python3
@@ -106,10 +106,10 @@ run(MyOperation)
     assert metadata.outputs["output_with_example"].example == "example_value"
 
 
-def test_load_job_metadata() -> None:
-    from tarmac.metadata import JobMetadata
+def test_load_workflow_metadata():
+    from tarmac.metadata import WorkflowMetadata
 
-    job = """
+    workflow = """
 # This is YAML syntax
 inputs:
     example_input:
@@ -137,11 +137,11 @@ steps:
         env:
             FOO: bar
             BAZ: qux
-    - job: example_job
+    - workflow: example_workflow
 
 """
 
-    metadata = JobMetadata.load(job)
+    metadata = WorkflowMetadata.load(workflow)
     assert metadata.inputs["example_input"].type == "str"
     assert metadata.inputs["example_input"].description == "This is an example input"
     assert metadata.inputs["example_input"].default == "default_value"
@@ -162,5 +162,5 @@ steps:
     assert isinstance(metadata.steps[1].params["env"], dict)
     assert metadata.steps[1].params["env"]["FOO"] == "bar"
     assert metadata.steps[1].params["env"]["BAZ"] == "qux"
-    assert metadata.steps[2].job == "example_job"
+    assert metadata.steps[2].workflow == "example_workflow"
     assert metadata.steps[2].name == ""

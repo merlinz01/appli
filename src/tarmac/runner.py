@@ -14,9 +14,12 @@ logger = getLogger(__name__)
 class Runner:
     def __init__(self, base_path: str):
         self.base_path = base_path
+        self._uv_bin = None
 
-    def find_uv_bin(self):
-        return find_uv_bin()
+    def _find_uv_bin(self):
+        if not self._uv_bin:
+            self._uv_bin = find_uv_bin()
+        return self._uv_bin
 
     def _get_workflow_filename(self, name: str) -> str:
         return os.path.join(self.base_path, "workflows", name + ".yml")
@@ -37,7 +40,7 @@ class Runner:
             tempfile.NamedTemporaryFile(mode="w+b") as outputs_file,
         ):
             cmd = [
-                self.find_uv_bin(),
+                self._find_uv_bin(),
                 "run",
                 "--color",
                 "never",

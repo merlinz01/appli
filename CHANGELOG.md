@@ -4,6 +4,10 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+### Changed
+
+- Cache `uv` command path in runner
+
 ## [0.1.5]
 
 - Unify workflow terminology

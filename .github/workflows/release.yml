@@ -22,7 +22,7 @@ jobs:
         run: uv sync --dev
 
       - name: Test
-        run: ./venv/bin/pytest
+        run: .venv/bin/pytest
 
       - name: Build packages
         run: uv build

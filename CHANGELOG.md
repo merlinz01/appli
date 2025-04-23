@@ -8,11 +8,13 @@ This is the changelog for Tarmac.
 
 - Add workflow step hook to runner
 - Add `python` workflow step type
+- Add `--output-format` argument to command
 
 ### Changed
 
 - Cache `uv` command path in runner
 - Pass `--native-tls` flag to `uv` command
+- Change default output format to JSON
 
 ## [0.1.5]
 

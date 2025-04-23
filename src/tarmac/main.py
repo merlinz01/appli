@@ -2,6 +2,7 @@ import argparse
 import os
 import logging
 import yaml
+import json
 
 from .runner import Runner
 
@@ -25,6 +26,13 @@ def main(args=None):
         nargs="+",
         help="The inputs to pass to the script",
     )
+    parser.add_argument(
+        "--output-format",
+        choices=["json", "yaml"],
+        default="json",
+        help="Output format for the result",
+    )
+
     args = parser.parse_args(args)
 
     inputs = {}
@@ -39,5 +47,7 @@ def main(args=None):
         or os.getcwd()
     )
     result = runner.execute_workflow(args.workflow, inputs)
-    print()
-    print(yaml.dump(result, indent=2))
+    if args.output_format == "json":
+        print(json.dumps(result, indent=2))
+    else:
+        print(yaml.safe_dump(result, indent=2))

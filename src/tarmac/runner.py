@@ -66,7 +66,6 @@ class Runner:
             env = os.environ.copy()
             env["TARMAC_INPUTS_FILE"] = inputs_file.name
             env["TARMAC_OUTPUTS_FILE"] = outputs_file.name
-            logger.info(f"Executing {cmd}")
             p = subprocess.Popen(
                 cmd,
                 env=env,
@@ -201,4 +200,4 @@ class Runner:
         It can be used by subclasses to perform additional actions, such as logging or
         notifying the user.
         """
-        logger.info(f"Step {step.id} executed with outputs: {outputs}")
+        logger.info(f"Step {step.name or step.id} executed")

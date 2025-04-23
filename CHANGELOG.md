@@ -12,6 +12,7 @@ This is the changelog for Tarmac.
 ### Changed
 
 - Cache `uv` command path in runner
+- Pass `--native-tls` flag to `uv` command
 
 ## [0.1.5]
 

@@ -49,6 +49,7 @@ class Runner:
                 "--no-config",
                 "--no-project",
                 "--no-env-file",
+                "--native-tls",
                 "--with",
                 "tarmac",
                 "--script",

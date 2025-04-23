@@ -8,8 +8,6 @@ from .runner import Runner
 
 
 def main(args=None):
-    logging.basicConfig(level=logging.INFO)
-
     parser = argparse.ArgumentParser(description="Execute a script with inputs")
     parser.add_argument("workflow", type=str, help="The workflow to execute")
     parser.add_argument(
@@ -24,7 +22,7 @@ def main(args=None):
         metavar="key=value",
         type=str,
         nargs="+",
-        help="The inputs to pass to the script",
+        help="An input to pass to the script",
     )
     parser.add_argument(
         "--output-format",
@@ -32,8 +30,16 @@ def main(args=None):
         default="json",
         help="Output format for the result",
     )
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="Set the logging level",
+    )
 
     args = parser.parse_args(args)
+
+    logging.basicConfig(level=args.log_level)
 
     inputs = {}
     if args.inputs:

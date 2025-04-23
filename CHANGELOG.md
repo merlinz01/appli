@@ -9,6 +9,7 @@ This is the changelog for Tarmac.
 - Add workflow step hook to runner
 - Add `python` workflow step type
 - Add `--output-format` argument to command
+- Add `--log-level` argument to command
 
 ### Changed
 

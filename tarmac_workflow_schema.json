@@ -1,0 +1,132 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Tarmac Workflow",
+    "description": "Tarmac workflow definition files",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "The name of the workflow."
+        },
+        "description": {
+            "type": "string",
+            "description": "A brief description of the workflow."
+        },
+        "inputs": {
+            "type": ["object", "null"],
+            "description": "Inputs for the workflow.",
+            "additionalProperties": {
+                "type": ["object"],
+                "description": "Input value.",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the input."
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Type of the input.",
+                        "enum": ["string", "int", "float", "bool", "dict", "list"]
+                    },
+                    "default": {
+                        "description": "Default value for the input."
+                    },
+                    "required": {
+                        "type": "boolean",
+                        "description": "Whether the input is required."
+                    },
+                    "example": {
+                        "description": "Example value for the input."
+                    }
+                },
+                "required": ["type"],
+                "additionalProperties": false
+            }
+        },
+        "outputs": {
+            "type": ["object", "null"],
+            "description": "Outputs of the workflow.",
+            "additionalProperties": {
+                "type": ["object"],
+                "description": "Output value.",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the output."
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Type of the output.",
+                        "enum": ["string", "int", "float", "bool", "dict", "list"]
+                    },
+                    "example": {
+                        "description": "Example value for the input."
+                    }
+                },
+                "required": ["type"],
+                "additionalProperties": false
+            }
+        },
+        "steps": {
+            "type": "array",
+            "description": "List of steps in the workflow.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the step."
+                    },
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier for the step."
+                    },
+                    "do": {
+                        "type": "string",
+                        "description": "Name of the script to execute.",
+                        "pattern": "^[a-zA-Z0-9_\\-\\.]+$"
+                    },
+                    "run": {
+                        "type": "string",
+                        "description": "Name of the workflow to execute."
+                    },
+                    "py": {
+                        "type": "string",
+                        "description": "Python code to execute."
+                    },
+                    "with": {
+                        "type": "object",
+                        "description": "Parameters to pass to the script, command, or workflow.",
+                        "additionalProperties": {
+                            "description": "Parameter key/value."
+                        }
+                    }
+                },
+                "required": [],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": ["steps"],
+    "additionalProperties": false,
+    "examples": [
+        {
+            "steps": [
+                {
+                    "name": "Step 1",
+                    "action": "build",
+                    "parameters": {
+                        "target": "all"
+                    }
+                },
+                {
+                    "name": "Step 2",
+                    "action": "test",
+                    "parameters": {
+                        "testType": "unit"
+                    }
+                }
+            ]
+        }
+    ]
+}

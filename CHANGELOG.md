@@ -15,6 +15,7 @@ This is the changelog for Tarmac.
 - Add `--version` argument to command
 - Add `colored-text` as default output format
 - Add `Failure` exception for use in scripts
+- Add JSON schema for workflow definition files
 
 ### Changed
 

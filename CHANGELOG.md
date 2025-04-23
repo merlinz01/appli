@@ -14,6 +14,7 @@ This is the changelog for Tarmac.
 - Add `text` output format
 - Add `--version` argument to command
 - Add `colored-text` as default output format
+- Add `Failure` exception for use in scripts
 
 ### Changed
 

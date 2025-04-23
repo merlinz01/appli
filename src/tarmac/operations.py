@@ -4,6 +4,10 @@ import os
 import traceback
 
 
+class Failure(Exception):
+    """Generic exception raised when an operation fails."""
+
+
 class OperationInterface:
     def __init__(self):
         self.inputs = {}
@@ -29,6 +33,9 @@ def run(func):
     try:
         func(op)
         op.outputs["succeeded"] = True
+    except Failure as e:
+        op.outputs["succeeded"] = False
+        op.outputs["error"] = str(e)
     except Exception:
         op.outputs["succeeded"] = False
         op.outputs["error"] = traceback.format_exc()

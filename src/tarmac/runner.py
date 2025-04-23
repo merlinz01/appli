@@ -4,6 +4,8 @@ import subprocess
 import sys
 import tempfile
 from uv import find_uv_bin
+
+from tarmac.operations import Failure
 from .metadata import ScriptMetadata, WorkflowMetadata, ValueMapping, WorkflowStep
 import logging
 import dotmap
@@ -116,7 +118,11 @@ class Runner:
         }
 
     def execute_python(self, script: str, inputs: ValueMapping) -> ValueMapping:
-        env = {"inputs": inputs, "outputs": {}}
+        env = {
+            "inputs": inputs,
+            "outputs": {},
+            "Failure": Failure,
+        }
         try:
             exec(script, env)
         except BaseException:

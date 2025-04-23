@@ -1,6 +1,7 @@
 import argparse
 import os
 import logging
+import sys
 import yaml
 import json
 
@@ -36,6 +37,14 @@ def main(args=None):
         default="INFO",
         help="Set the logging level",
     )
+    parser.add_argument(
+        "-o",
+        "--output-file",
+        type=str,
+        default="-",
+        metavar="FILE",
+        help="File to write the output to. If not specified or '-', output will be printed to stdout.",
+    )
 
     args = parser.parse_args(args)
 
@@ -53,7 +62,16 @@ def main(args=None):
         or os.getcwd()
     )
     result = runner.execute_workflow(args.workflow, inputs)
-    if args.output_format == "json":
-        print(json.dumps(result, indent=2))
-    else:
-        print(yaml.safe_dump(result, indent=2))
+
+    def print_result(file):
+        if args.output_format == "json":
+            print(json.dumps(result, indent=2), file=file)
+        else:
+            print(yaml.safe_dump(result, indent=2), file=file)
+
+    if args.output_file:
+        if args.output_file == "-":
+            print_result(sys.stdout)
+        else:
+            with open(args.output_file, "w") as file:
+                print_result(file)

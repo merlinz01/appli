@@ -19,6 +19,7 @@ This is the changelog for Tarmac.
 - Cache `uv` command path in runner
 - Pass `--native-tls` flag to `uv` command
 - Change default output format to JSON
+- Move sample scripts and workflows to git submodule
 
 ## [0.1.5]
 

@@ -4,6 +4,7 @@ import logging
 import sys
 import yaml
 import json
+from typing import Any, TextIO
 from . import __version__
 
 from .runner import Runner
@@ -42,8 +43,8 @@ def main(args=None):
     )
     parser.add_argument(
         "--output-format",
-        choices=["json", "yaml", "text"],
-        default="text",
+        choices=["json", "yaml", "text", "colored-text"],
+        default="colored-text",
         help="Output format for the result",
     )
     parser.add_argument(
@@ -78,56 +79,113 @@ def main(args=None):
     )
     result = runner.execute_workflow(args.workflow, inputs)
 
-    def print_result(file):
+    def print_result(file: TextIO):
         if args.output_format == "json":
-            print(json.dumps(result, indent=2), file=file)
+            file.write(json.dumps(result, indent=2))
         elif args.output_format == "yaml":
-            print(yaml.safe_dump(result, indent=2), file=file)
+            file.write(yaml.safe_dump(result, indent=2))
         else:
-            print(
-                "\n(Note: this output is meant to be human-readable. Use JSON format for parsing.)\n",
-                file=file,
+            colors = {
+                "red": "",
+                "green": "",
+                "yellow": "",
+                "blue": "",
+                "magenta": "",
+                "cyan": "",
+                "white": "",
+                None: "",
+            }
+            if args.output_format == "colored-text":
+                colors = {
+                    "red": "\033[31m",
+                    "green": "\033[32m",
+                    "yellow": "\033[33m",
+                    "blue": "\033[34m",
+                    "magenta": "\033[35m",
+                    "cyan": "\033[36m",
+                    "white": "\033[37m",
+                    None: "\033[0m",
+                }
+            file.write(colors["green"])
+            file.write(
+                "\n(Note: this output is meant to be human-readable."
+                " Use JSON format for parsing.)\n\n",
             )
-            print_object_text(result, indent=0, file=file)
+            file.write(colors[None])
+            print_object_text(result, 0, file, colors)
 
-    def print_object_text(obj, indent=0, file=sys.stdout):
+    def print_object_text(obj: Any, indent: int, file: TextIO, colors: dict):
         max_length = 100
-        scalars = (str, int, float, bool, type(None))
+        scalars = (type(None), bool, str, int, float, complex)
+        type_colors = {
+            type(None): colors["magenta"],
+            bool: colors["cyan"],
+            str: colors["green"],
+            int: colors["yellow"],
+            float: colors["yellow"],
+            complex: colors["yellow"],
+        }
         if isinstance(obj, str):
             lines = obj.splitlines() or ['""']
             for line in lines:
                 while True:
-                    print(" " * indent + line[:max_length], file=file)
+                    file.write(" " * indent)
+                    file.write(line[:max_length])
                     line = line[max_length:]
                     if not line:
                         break
+                    file.write(colors["yellow"])
+                    file.write(" \u2935")
+                    file.write(colors[None])
+                    file.write("\n")
+                file.write("\n")
         elif isinstance(obj, dict):
             for key, value in obj.items():
-                print(" " * indent + (str(key) or '""') + ":", file=file, end="")
+                file.write(" " * indent)
+                file.write(colors["blue"])
+                file.write(str(key) or '""')
+                file.write(colors[None])
+                file.write(":")
                 if (
                     isinstance(value, scalars)
-                    and "\n" not in (s := str(value))
+                    and "\n" not in (s := str(value) or "")
                     and len(s) < max_length
                 ):
-                    print(" ", file=file, end="")
-                    print_object_text(s, indent=0, file=file)
+                    file.write(" ")
+                    file.write(type_colors.get(type(value), colors[None]))
+                    print_object_text(s, 0, file, colors)
+                    file.write(colors[None])
                 else:
-                    print(file=file)
-                    print_object_text(value, indent=indent + 2, file=file)
+                    file.write("\n")
+                    file.write(type_colors.get(type(value), colors[None]))
+                    print_object_text(value, indent + 2, file, colors)
+                    file.write(colors[None])
         elif isinstance(obj, (list, tuple)):
             for item in obj:
                 if (
                     isinstance(item, scalars)
-                    and "\n" not in (s := str(item))
+                    and "\n" not in (s := str(item) or "")
                     and len(s) < max_length
                 ):
-                    print(" " * indent + "- ", file=file, end="")
-                    print_object_text(s, indent=0, file=file)
+                    file.write(" " * indent)
+                    file.write(colors["blue"])
+                    file.write("- ")
+                    file.write(type_colors.get(type(item), colors[None]))
+                    print_object_text(s, 0, file, colors)
+                    file.write(colors[None])
                 else:
-                    print(" " * indent + "-\u2935", file=file)
-                    print_object_text(item, indent=indent + 2, file=file)
+                    file.write(" " * indent)
+                    file.write(colors["blue"])
+                    file.write("-\u2935\n")
+                    file.write(type_colors.get(type(item), colors[None]))
+                    print_object_text(item, indent + 2, file, colors)
+                    file.write(colors[None])
         else:
-            print(" " * indent + str(obj), file=file)
+            file.write(" " * indent)
+            file.write(colors["red"])
+            file.write(str(obj) or '""')
+            file.write(colors[None])
+            file.write("\n")
 
     if args.output_file:
         if args.output_file == "-":

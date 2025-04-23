@@ -13,6 +13,7 @@ This is the changelog for Tarmac.
 - Add `--output-file` argument to command
 - Add `text` output format
 - Add `--version` argument to command
+- Add `colored-text` as default output format
 
 ### Changed
 

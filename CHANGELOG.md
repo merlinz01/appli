@@ -20,6 +20,7 @@ This is the changelog for Tarmac.
 - Pass `--native-tls` flag to `uv` command
 - Change default output format to JSON
 - Move sample scripts and workflows to git submodule
+- Improve text output format
 
 ## [0.1.5]
 

@@ -84,24 +84,48 @@ def main(args=None):
         elif args.output_format == "yaml":
             print(yaml.safe_dump(result, indent=2), file=file)
         else:
+            print(
+                "\n(Note: this output is meant to be human-readable. Use JSON format for parsing.)\n",
+                file=file,
+            )
             print_object_text(result, indent=0, file=file)
 
     def print_object_text(obj, indent=0, file=sys.stdout):
+        max_length = 100
+        scalars = (str, int, float, bool, type(None))
         if isinstance(obj, str):
             lines = obj.splitlines() or ['""']
             for line in lines:
-                print(" " * indent + line, file=file)
+                while True:
+                    print(" " * indent + line[:max_length], file=file)
+                    line = line[max_length:]
+                    if not line:
+                        break
         elif isinstance(obj, dict):
             for key, value in obj.items():
-                print(" " * indent + str(key) + ":", file=file, end="")
-                if isinstance(
-                    value, (str, int, float, bool, type(None))
-                ) and "\n" not in str(value):
+                print(" " * indent + (str(key) or '""') + ":", file=file, end="")
+                if (
+                    isinstance(value, scalars)
+                    and "\n" not in (s := str(value))
+                    and len(s) < max_length
+                ):
                     print(" ", file=file, end="")
-                    print_object_text(value, indent=0, file=file)
+                    print_object_text(s, indent=0, file=file)
                 else:
                     print(file=file)
                     print_object_text(value, indent=indent + 2, file=file)
+        elif isinstance(obj, (list, tuple)):
+            for item in obj:
+                if (
+                    isinstance(item, scalars)
+                    and "\n" not in (s := str(item))
+                    and len(s) < max_length
+                ):
+                    print(" " * indent + "- ", file=file, end="")
+                    print_object_text(s, indent=0, file=file)
+                else:
+                    print(" " * indent + "-\u2935", file=file)
+                    print_object_text(item, indent=indent + 2, file=file)
         else:
             print(" " * indent + str(obj), file=file)
 

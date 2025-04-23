@@ -27,8 +27,8 @@ def main(args=None):
     )
     parser.add_argument(
         "--output-format",
-        choices=["json", "yaml"],
-        default="json",
+        choices=["json", "yaml", "text"],
+        default="text",
         help="Output format for the result",
     )
     parser.add_argument(
@@ -66,8 +66,29 @@ def main(args=None):
     def print_result(file):
         if args.output_format == "json":
             print(json.dumps(result, indent=2), file=file)
-        else:
+        elif args.output_format == "yaml":
             print(yaml.safe_dump(result, indent=2), file=file)
+        else:
+            print_object_text(result, indent=0, file=file)
+
+    def print_object_text(obj, indent=0, file=sys.stdout):
+        if isinstance(obj, str):
+            lines = obj.splitlines() or ['""']
+            for line in lines:
+                print(" " * indent + line, file=file)
+        elif isinstance(obj, dict):
+            for key, value in obj.items():
+                print(" " * indent + str(key) + ":", file=file, end="")
+                if isinstance(
+                    value, (str, int, float, bool, type(None))
+                ) and "\n" not in str(value):
+                    print(" ", file=file, end="")
+                    print_object_text(value, indent=0, file=file)
+                else:
+                    print(file=file)
+                    print_object_text(value, indent=indent + 2, file=file)
+        else:
+            print(" " * indent + str(obj), file=file)
 
     if args.output_file:
         if args.output_file == "-":

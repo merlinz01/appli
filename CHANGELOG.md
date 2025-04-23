@@ -11,6 +11,7 @@ This is the changelog for Tarmac.
 - Add `--output-format` argument to command
 - Add `--log-level` argument to command
 - Add `--output-file` argument to command
+- Add `text` output format
 
 ### Changed
 

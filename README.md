@@ -32,7 +32,7 @@ tarmac WORKFLOW [OPTIONS]
 |-|-|
 | `-h`, `--help` | Show this message and exit. |
 | `-i`, `--input` | Define an input for the workflow. |
-| `--output-format` | Define the output format for the workflow. Can be `json` or `yaml`. |
+| `--output-format` | Define the output format for the workflow. Can be `json`, `yaml`, or `text`. |
 | `-b`, `--base-path` | Define the base path for the workflow, containing workflows and scripts. Defaults to `TARMAC_BASE_PATH` environment variable or the current directory. |
 | `-o`, `--output-file` | Define the output file for the workflow. Defaults to stdout. |
 

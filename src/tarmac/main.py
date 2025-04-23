@@ -4,13 +4,28 @@ import logging
 import sys
 import yaml
 import json
+from . import __version__
 
 from .runner import Runner
 
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Execute a script with inputs")
-    parser.add_argument("workflow", type=str, help="The workflow to execute")
+    parser = argparse.ArgumentParser(
+        prog="tarmac",
+        description="Execute a tarmac workflow",
+        epilog="See https://github.com/merlinz01/tarmac for more information.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="Show the version and exit",
+    )
+    parser.add_argument(
+        "workflow",
+        type=str,
+        help="The workflow to execute",
+    )
     parser.add_argument(
         "-b",
         "--base-path",

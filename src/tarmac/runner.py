@@ -206,4 +206,4 @@ class Runner:
         It can be used by subclasses to perform additional actions, such as logging or
         notifying the user.
         """
-        logger.info(f"Step {step.name or step.id} executed")
+        logger.info(f"Step {step.name or step.id or '<unnamed>'} executed")

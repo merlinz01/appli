@@ -1,15 +1,17 @@
 import json
+import logging
 import os
 import subprocess
 import sys
 import tempfile
+import traceback
+
+import dotmap
 from uv import find_uv_bin
 
 from tarmac.operations import Failure
-from .metadata import ScriptMetadata, WorkflowMetadata, ValueMapping, WorkflowStep
-import logging
-import dotmap
-import traceback
+
+from .metadata import ScriptMetadata, ValueMapping, WorkflowMetadata, WorkflowStep
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,9 @@ class Runner:
             tempfile.NamedTemporaryFile(mode="wb") as inputs_file,
             tempfile.NamedTemporaryFile(mode="w+b") as outputs_file,
         ):
+            with_tarmac = ["--with", "tarmac"]
+            if os.environ.get("TARMAC_EDITABLE_INSTALL"):
+                with_tarmac = ["--with-editable", "."]
             cmd = [
                 self._find_uv_bin(),
                 "run",
@@ -52,8 +57,7 @@ class Runner:
                 "--no-project",
                 "--no-env-file",
                 "--native-tls",
-                "--with",
-                "tarmac",
+                *with_tarmac,
                 "--script",
             ]
             cmd.extend(metadata.additional_uv_args)

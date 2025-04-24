@@ -229,9 +229,10 @@ class WorkflowStep(BaseModel):
     If provided, the type will be set to "script".
     """
 
-    run: str | None = None
+    run: str | list[str] | None = None
     """
     The shell command to run.
+    Can be a list to run multiple commands.
     If provided, the type will be set to "shell".
     """
 

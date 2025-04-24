@@ -103,7 +103,9 @@ class Runner:
                 outputs.setdefault("succeeded", True)
             return outputs
 
-    def execute_shell(self, script: str, inputs: ValueMapping) -> ValueMapping:
+    def execute_shell(
+        self, script: str | list[str], inputs: ValueMapping
+    ) -> ValueMapping:
         env = os.environ.copy()
         env.update(inputs.pop("env", {}))
         cwd = inputs.pop("cwd", os.getcwd())
@@ -112,24 +114,36 @@ class Runner:
             raise ValueError(f"Invalid input for shell script: {invalid}")
         except StopIteration:
             pass
-        p = subprocess.Popen(
-            script,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            env=env,
-            cwd=cwd,
-            encoding="utf-8",
-            errors="replace",
-        )
-        stdout, stderr = p.communicate()
-        return {
-            "output": stdout,
-            "error": stderr,
-            "returncode": p.returncode,
-            "succeeded": p.returncode == 0,
+        if isinstance(script, str):
+            script = [script]
+        out: ValueMapping = {
+            "succeeded": True,
+            "output": "",
+            "error": "",
+            "returncode": 0,
         }
+        for s in script:
+            p = subprocess.Popen(
+                s,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                env=env,
+                cwd=cwd,
+                encoding="utf-8",
+                errors="replace",
+            )
+            stdout, stderr = p.communicate()
+            out["returncode"] = p.returncode
+            out["output"] += stdout
+            out["error"] += stderr
+            if p.returncode != 0:
+                out["succeeded"] = False
+                break
+            else:
+                out["succeeded"] = True
+        return out
 
     def execute_python(
         self, script: str, inputs: ValueMapping, steps: ValueMapping

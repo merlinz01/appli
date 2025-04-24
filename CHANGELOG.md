@@ -17,6 +17,7 @@ This is the changelog for Tarmac.
 - Add `Failure` exception for use in scripts
 - Add JSON schema for workflow definition files
 - Add `cwd` and `env` arguments to `run` workflow step
+- Add `steps` variable to Python workflow step environment
 
 ### Changed
 

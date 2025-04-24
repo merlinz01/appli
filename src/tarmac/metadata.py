@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterator, Self, TypeAlias, Literal, Mapping
+from typing import Any, Iterator, Literal, Self, TypeAlias
 
 import yaml
 from pydantic import BaseModel, Field
@@ -20,7 +20,7 @@ def _metadata_stream(script: str) -> Iterator[tuple[str, str]]:
 
 IOTypeString: TypeAlias = Literal["str", "int", "float", "bool", "list", "dict"]
 IOType: TypeAlias = Any
-ValueMapping: TypeAlias = Mapping[str, IOType]
+ValueMapping: TypeAlias = dict[str, IOType]
 
 
 class Input(BaseModel):
@@ -98,19 +98,14 @@ class Metadata(BaseModel):
     Common metadata for all operations.
     """
 
-    description: str = ""
-    """
-    A description of the operation.
-    """
-
-    inputs: dict[str, Input] = {}
+    inputs: dict[str, Input] = Field(default_factory=dict)
     """
     A dictionary of inputs for the operation.
     The keys are the names of the inputs.
     The values are Input objects.
     """
 
-    outputs: dict[str, Output] = {}
+    outputs: dict[str, Output] = Field(default_factory=dict)
     """
     A dictionary of outputs for the operation.
     The keys are the names of the outputs.
@@ -171,6 +166,11 @@ class Metadata(BaseModel):
 class ScriptMetadata(Metadata):
     """
     Metadata for a Python script.
+    """
+
+    description: str = ""
+    """
+    A description of the operation.
     """
 
     dependencies: list[str] = []
@@ -291,6 +291,11 @@ class WorkflowStep(BaseModel):
 class WorkflowMetadata(Metadata):
     """
     Metadata for a workflow.
+    """
+
+    description: str = ""
+    """
+    A description of the workflow.
     """
 
     steps: list[WorkflowStep] = Field(default_factory=list)

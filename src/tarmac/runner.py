@@ -131,10 +131,13 @@ class Runner:
             "succeeded": p.returncode == 0,
         }
 
-    def execute_python(self, script: str, inputs: ValueMapping) -> ValueMapping:
+    def execute_python(
+        self, script: str, inputs: ValueMapping, steps: ValueMapping
+    ) -> ValueMapping:
         env = {
             "inputs": inputs,
             "outputs": {},
+            "steps": steps,
             "Failure": Failure,
         }
         try:
@@ -181,7 +184,7 @@ class Runner:
             out = self.execute_shell(step.run, step.params)
         elif step.type == "python":
             assert step.py is not None
-            out = self.execute_python(step.py, step.params)
+            out = self.execute_python(step.py, step.params, outputs["steps"])
         elif step.type == "workflow":
             assert step.workflow is not None
             out = self.execute_workflow(step.workflow, step.params)

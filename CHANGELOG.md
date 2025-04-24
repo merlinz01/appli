@@ -4,6 +4,8 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+## [0.1.6]
+
 ### Added
 
 - Add workflow step hook to runner

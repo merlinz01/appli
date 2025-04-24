@@ -100,12 +100,22 @@ class Runner:
             return outputs
 
     def execute_shell(self, script: str, inputs: ValueMapping) -> ValueMapping:
+        env = os.environ.copy()
+        env.update(inputs.pop("env", {}))
+        cwd = inputs.pop("cwd", os.getcwd())
+        try:
+            invalid = next(iter(inputs))
+            raise ValueError(f"Invalid input for shell script: {invalid}")
+        except StopIteration:
+            pass
         p = subprocess.Popen(
             script,
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            env=env,
+            cwd=cwd,
             encoding="utf-8",
             errors="replace",
         )

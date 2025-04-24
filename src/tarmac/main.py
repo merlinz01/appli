@@ -187,7 +187,7 @@ def main(args=None):
         else:
             file.write(" " * indent)
             file.write(colors["red"])
-            file.write(str(obj) or '""')
+            file.write(repr(obj))
             file.write(colors[None])
             file.write("\n")
 

@@ -94,6 +94,10 @@
                         "type": "string",
                         "description": "Python code to execute."
                     },
+                    "if": {
+                        "type": "string",
+                        "description": "Condition to execute the step."
+                    },
                     "with": {
                         "type": "object",
                         "description": "Parameters to pass to the script, command, or workflow.",

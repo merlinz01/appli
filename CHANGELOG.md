@@ -26,6 +26,7 @@ This is the changelog for Tarmac.
 - Change default output format to JSON
 - Move sample scripts and workflows to git submodule
 - Improve text output format
+- Use `uv_build` package build backend
 
 ## [0.1.5]
 

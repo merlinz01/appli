@@ -109,6 +109,7 @@ class Runner:
         env = os.environ.copy()
         env.update(inputs.pop("env", {}))
         cwd = inputs.pop("cwd", os.getcwd())
+        stdin = inputs.pop("stdin", None)
         try:
             invalid = next(iter(inputs))
             raise ValueError(f"Invalid input for shell script: {invalid}")
@@ -128,13 +129,15 @@ class Runner:
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE if stdin else None,
                 text=True,
                 env=env,
                 cwd=cwd,
                 encoding="utf-8",
                 errors="replace",
             )
-            stdout, stderr = p.communicate()
+            stdout, stderr = p.communicate(stdin)
+            stdin = None  # only pass stdin to the first command
             out["returncode"] = p.returncode
             out["output"] += stdout
             out["error"] += stderr

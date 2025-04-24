@@ -57,6 +57,38 @@ def test_workflow_step_run_type_multiple(config_dir: Path):
     }
 
 
+def test_workflow_step_run_type_with_stdin(config_dir: Path):
+    from tarmac.runner import Runner
+
+    runner = Runner(base_path=str(config_dir))
+    (config_dir / "workflows").mkdir()
+    with open(config_dir / "workflows" / "workflow.yml", "w") as f:
+        f.write(
+            """
+            steps:
+              - name: step1
+                run:
+                  - cat
+                  - echo "Goodbye, World!"
+                  - cat
+                with:
+                  stdin: "Hello, World!\\n"
+            """
+        )
+    outputs = runner.execute_workflow("workflow", {})
+    assert outputs == {
+        "steps": {
+            "step1": {
+                "succeeded": True,
+                "error": "",
+                "output": "Hello, World!\nGoodbye, World!\n",
+                "returncode": 0,
+            }
+        },
+        "succeeded": True,
+    }
+
+
 def test_workflow_step_script_type(config_dir: Path):
     from tarmac.runner import Runner
 

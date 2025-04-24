@@ -7,6 +7,7 @@ This is the changelog for Tarmac.
 ### Added
 
 - Allow multiple commands to be specified in a `run` workflow step
+- Add `stdin` parameter to `run` workflow step
 
 ## [0.1.6]
 

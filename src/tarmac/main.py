@@ -106,7 +106,7 @@ def main(args=None):
                     "white": "\033[37m",
                     None: "\033[0m",
                 }
-            file.write(colors["green"])
+            file.write(colors["cyan"])
             file.write(
                 "\n(Note: this output is meant to be human-readable."
                 " Use JSON format for parsing.)\n\n",
@@ -130,7 +130,9 @@ def main(args=None):
             for line in lines:
                 while True:
                     file.write(" " * indent)
+                    file.write(colors["green"])
                     file.write(line[:max_length])
+                    file.write(colors[None])
                     line = line[max_length:]
                     if not line:
                         break
@@ -153,8 +155,9 @@ def main(args=None):
                 ):
                     file.write(" ")
                     file.write(type_colors.get(type(value), colors[None]))
-                    print_object_text(s, 0, file, colors)
+                    file.write(str(value) or '""')
                     file.write(colors[None])
+                    file.write("\n")
                 else:
                     file.write("\n")
                     file.write(type_colors.get(type(value), colors[None]))
@@ -171,8 +174,9 @@ def main(args=None):
                     file.write(colors["blue"])
                     file.write("- ")
                     file.write(type_colors.get(type(item), colors[None]))
-                    print_object_text(s, 0, file, colors)
+                    file.write(str(item) or '""')
                     file.write(colors[None])
+                    file.write("\n")
                 else:
                     file.write(" " * indent)
                     file.write(colors["blue"])

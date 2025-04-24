@@ -21,7 +21,7 @@ jobs:
         run: uv sync --dev
 
       - name: Lint
-        run: .venv/bin/ruff check
+        run: uv run ruff check
 
       - name: Test
-        run: .venv/bin/pytest
+        run: uv run pytest

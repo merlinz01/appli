@@ -1,12 +1,13 @@
 import argparse
-import os
-import logging
-import sys
-import yaml
 import json
+import logging
+import os
+import sys
 from typing import Any, TextIO
-from . import __version__
 
+import yaml
+
+from . import __version__
 from .runner import Runner
 
 
@@ -23,9 +24,14 @@ def main(args=None):
         help="Show the version and exit",
     )
     parser.add_argument(
+        "--script",
+        action="store_true",
+        help="Run a script instead of a workflow",
+    )
+    parser.add_argument(
         "workflow",
         type=str,
-        help="The workflow to execute",
+        help="The workflow (or script if --script is given) to execute",
     )
     parser.add_argument(
         "-b",
@@ -77,7 +83,10 @@ def main(args=None):
         or os.environ.get("TARMAC_BASE_PATH", "")
         or os.getcwd()
     )
-    result = runner.execute_workflow(args.workflow, inputs)
+    if args.script:
+        result = runner.execute_script(args.workflow, inputs)
+    else:
+        result = runner.execute_workflow(args.workflow, inputs)
 
     def print_result(file: TextIO):
         if args.output_format == "json":

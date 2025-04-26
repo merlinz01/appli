@@ -32,6 +32,8 @@ tarmac WORKFLOW [OPTIONS]
 |-|-|
 | `-h`, `--help` | Show the command usage and exit. |
 | `--version` | Show the version and exit. |
+| `WORKFLOW` | The name of the workflow (or script if `--script` is given) to run. |
+| `--script` | Run a script directly instead of a workflow. |
 | `-i`, `--input` | Define an input for the workflow. |
 | `--output-format` | Define the output format for the workflow. Default is `colored-text` |
 | `-b`, `--base-path` | Define the base path for the workflow, containing workflows and scripts. Defaults to `TARMAC_BASE_PATH` environment variable or the current directory. |

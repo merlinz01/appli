@@ -88,11 +88,15 @@
                     },
                     "run": {
                         "type": "string",
-                        "description": "Name of the workflow to execute."
+                        "description": "Shell command to execute."
                     },
                     "py": {
                         "type": "string",
                         "description": "Python code to execute."
+                    },
+                    "workflow": {
+                        "type": "string",
+                        "description": "Name of the workflow to execute."
                     },
                     "if": {
                         "type": "string",

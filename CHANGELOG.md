@@ -4,6 +4,8 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+## [0.1.7]
+
 ### Added
 
 - Allow multiple commands to be specified in a `run` workflow step

@@ -225,6 +225,7 @@ class Runner:
             return cond
         if not isinstance(cond, str):
             raise ValueError("Invalid condition type")
+
         env = {
             "inputs": dotmap.DotMap(inputs),
             "steps": dotmap.DotMap(outputs["steps"]),
@@ -233,6 +234,11 @@ class Runner:
             "isdir": os.path.isdir,
             "exists": os.path.exists,
             "platform": sys.platform,
+            "changed": (
+                lambda step: bool(
+                    outputs.get("steps", {}).get(step, {}).get("changed", False)
+                )
+            ),
         }
         code = compile(f"({cond})", "<condition>", "eval")
         return bool(eval(code, env, {}))

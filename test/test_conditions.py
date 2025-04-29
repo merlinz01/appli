@@ -47,6 +47,17 @@ steps:
   - id: step12
     py: print("platform")
     if: platform == "darwin"
+  - id: step13
+    py: outputs['changed'] = True
+  - id: step14
+    py: print("changed(step13)")
+    if: changed("step13")
+  - id: step15
+    py: print("changed(step14)")
+    if: changed("step14")
+  - id: step16
+    py: print("changed(nonexistent)")
+    if: changed("nonexistent")
 """
         )
     with open(config_dir / "existing.txt", "w") as f:
@@ -72,4 +83,9 @@ steps:
     assert outputs["steps"]["step12"]["succeeded"] is (
         (sys.platform == "darwin") or None
     )
+    assert outputs["steps"]["step13"]["succeeded"] is True
+    assert outputs["steps"]["step13"]["changed"] is True
+    assert outputs["steps"]["step14"]["succeeded"] is True
+    assert outputs["steps"]["step15"]["succeeded"] is None
+    assert outputs["steps"]["step16"]["succeeded"] is None
     assert outputs["succeeded"] is True

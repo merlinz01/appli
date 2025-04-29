@@ -72,7 +72,6 @@ jobs:
         run: |
           echo "# Release notes" > release_notes.md
           echo "" >> release_notes.md
-          echo "## Changes" >> release_notes.md
           python3 helper.py release-notes --version $VERSION >> release_notes.md
           echo "" >> release_notes.md
         env:

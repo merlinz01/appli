@@ -229,6 +229,9 @@ class Runner:
             "inputs": dotmap.DotMap(inputs),
             "steps": dotmap.DotMap(outputs["steps"]),
             "run": self._run_command,
+            "isfile": os.path.isfile,
+            "isdir": os.path.isdir,
+            "exists": os.path.exists,
             "platform": sys.platform,
         }
         code = compile(f"({cond})", "<condition>", "eval")

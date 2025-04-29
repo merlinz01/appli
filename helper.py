@@ -16,6 +16,19 @@ bump_version.add_argument(
     help="The new version to set.",
 )
 
+# release-notes
+release_notes = command.add_parser(
+    "release-notes",
+    help="Generate release notes from the changelog.",
+)
+release_notes.add_argument(
+    "--version",
+    type=str,
+    help="The version to generate release notes for.",
+    required=True,
+)
+
+
 args = parser.parse_args()
 if args.command == "bump-version":
     import re
@@ -113,3 +126,23 @@ if args.command == "bump-version":
     )
 
     print("Done.")
+
+elif args.command == "release-notes":
+    import re
+
+    args.version = args.version.lstrip("v")
+
+    with open("CHANGELOG.md", "r") as f:
+        content = f.read()
+
+    version_pattern = re.compile(
+        rf"## \[({args.version})\]\n\n(.*?)\n\n## ",
+        re.DOTALL,
+    )
+    match = version_pattern.search(content)
+    if match:
+        release_notes = match.group(2).strip()
+        print(release_notes)
+    else:
+        print(f"No release notes found for version {args.version}.")
+        exit(1)

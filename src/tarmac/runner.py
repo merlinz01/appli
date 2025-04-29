@@ -213,11 +213,6 @@ class Runner:
         self.workflow_step_hook(step, out)
         return out
 
-    def _run_command(self, cmd: str, **params) -> ValueMapping:
-        return dotmap.DotMap(self.execute_shell(cmd, params))
-
-    _run_command.__name__ = "run"
-
     def evaluate_condition(
         self, cond, inputs: ValueMapping, outputs: ValueMapping
     ) -> bool:
@@ -229,7 +224,7 @@ class Runner:
         env = {
             "inputs": dotmap.DotMap(inputs),
             "steps": dotmap.DotMap(outputs["steps"]),
-            "run": self._run_command,
+            "run": lambda cmd: dotmap.DotMap(self.execute_shell(cmd, {})),
             "isfile": os.path.isfile,
             "isdir": os.path.isdir,
             "exists": os.path.exists,
@@ -237,6 +232,12 @@ class Runner:
             "changed": (
                 lambda step: bool(
                     outputs.get("steps", {}).get(step, {}).get("changed", False)
+                )
+            ),
+            "skipped": (
+                lambda step: (
+                    outputs.get("steps", {}).get(step, {}).get("succeeded", True)
+                    is None
                 )
             ),
         }

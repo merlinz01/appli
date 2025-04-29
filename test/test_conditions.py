@@ -58,6 +58,18 @@ steps:
   - id: step16
     py: print("changed(nonexistent)")
     if: changed("nonexistent")
+  - id: step17
+    py: print("cmd('echo hello')")
+    if: run('echo hello').succeeded
+  - id: step18
+    py: print("cmd('laskjfasdfsdf')")
+    if: run('laskjfasdfsdf').succeeded
+  - id: step19
+    py: print("skipped(step1)")
+    if: skipped("step1")
+  - id: step20
+    py: print("skipped(step2)")
+    if: skipped("step2")
 """
         )
     with open(config_dir / "existing.txt", "w") as f:
@@ -88,4 +100,8 @@ steps:
     assert outputs["steps"]["step14"]["succeeded"] is True
     assert outputs["steps"]["step15"]["succeeded"] is None
     assert outputs["steps"]["step16"]["succeeded"] is None
+    assert outputs["steps"]["step17"]["succeeded"] is True
+    assert outputs["steps"]["step18"]["succeeded"] is None
+    assert outputs["steps"]["step19"]["succeeded"] is None
+    assert outputs["steps"]["step20"]["succeeded"] is True
     assert outputs["succeeded"] is True

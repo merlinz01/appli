@@ -154,7 +154,7 @@ class Metadata(BaseModel):
             return value
         if type_ == "list":
             if not isinstance(value, list):
-                raise ValueError(f"Input {name} must be a list")
+                raise ValueError(f"Input {name} must be a list, got {value!r}")
             return value
         if type_ == "dict":
             if not isinstance(value, dict):
@@ -258,6 +258,10 @@ class WorkflowStep(BaseModel):
     The condition to run the workflow step.
     If provided, the workflow step will only run if the condition is true.
     """
+
+    model_config = {
+        "extra": "forbid",
+    }
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)

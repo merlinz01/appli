@@ -1,10 +1,12 @@
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import tempfile
 import traceback
+from typing import Any
 
 import dotmap
 from uv import find_uv_bin
@@ -17,6 +19,9 @@ logger = logging.getLogger(__name__)
 
 
 class Runner:
+    _subst_regex = re.compile(r"\${((([^{][^}]*)})|{)")
+    _full_subst_regex = re.compile(r"^\${([^{][^}]*)}$")
+
     def __init__(self, base_path: str):
         self.base_path = base_path
         self._uv_bin = None
@@ -31,6 +36,30 @@ class Runner:
 
     def _get_script_filename(self, name: str) -> str:
         return os.path.join(self.base_path, "scripts", name + ".py")
+
+    def _substitute(self, v: Any, inputs: ValueMapping) -> Any:
+        if isinstance(v, str):
+            return self._substitute_string(v, inputs)
+        elif isinstance(v, list):
+            return [self._substitute(i, inputs) for i in v]
+        elif isinstance(v, dict):
+            return {k: self._substitute(v, inputs) for k, v in v.items()}
+        else:
+            return v
+
+    def _substitute_string(self, s: str, inputs: ValueMapping) -> Any:
+        if m := self._full_subst_regex.match(s):
+            return self._substitute_eval(m.group(1), inputs)
+
+        def subst(match):
+            if match.group(1) == "{":
+                return match.group(0)
+            return str(self._substitute_eval(match.group(3), inputs))
+
+        return self._subst_regex.sub(subst, s)
+
+    def _substitute_eval(self, s: str, inputs: ValueMapping) -> str:
+        return eval(s, {}, inputs)
 
     def execute_script(self, name: str, inputs: ValueMapping) -> ValueMapping:
         filename = self._get_script_filename(name)
@@ -193,20 +222,25 @@ class Runner:
             step.condition, inputs, outputs
         ):
             out = {"succeeded": None}
-        elif step.type == "script":
-            assert step.do is not None
-            out = self.execute_script(step.do, step.params)
-        elif step.type == "shell":
-            assert step.run is not None
-            out = self.execute_shell(step.run, step.params)
-        elif step.type == "python":
-            assert step.py is not None
-            out = self.execute_python(step.py, step.params, outputs["steps"])
-        elif step.type == "workflow":
-            assert step.workflow is not None
-            out = self.execute_workflow(step.workflow, step.params)
         else:
-            raise ValueError("unknown step type")
+            step.params = {
+                k: self._substitute(v, inputs) for k, v in step.params.items()
+            }
+            if step.type == "script":
+                assert step.do is not None
+                out = self.execute_script(step.do, step.params)
+            elif step.type == "shell":
+                assert step.run is not None
+                out = self.execute_shell(step.run, step.params)
+            elif step.type == "python":
+                assert step.py is not None
+                out = self.execute_python(step.py, step.params, outputs["steps"])
+            elif step.type == "workflow":
+                assert step.workflow is not None
+                out = self.execute_workflow(step.workflow, step.params)
+            else:
+                raise ValueError("unknown step type")
+
         assert isinstance(outputs["steps"], dict)
         assert step.id is not None
         outputs["steps"][step.id] = out

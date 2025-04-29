@@ -9,6 +9,7 @@ This is the changelog for Tarmac.
 - Add `exists`, `isfile`, and `isdir` condition helpers
 - Add `changed` condition helper
 - Add `skipped` condition helper
+- Add workflow step parameter value substitution
 
 ## [0.1.7]
 

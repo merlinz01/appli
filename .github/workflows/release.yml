@@ -21,8 +21,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
-      - name: Test
-        run: uv run pytest
+      - name: Test with coverage
+        run: uv run pytest --cov=src --cov-fail-under=100
 
       - name: Build packages
         run: uv build

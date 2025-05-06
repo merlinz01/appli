@@ -19,8 +19,16 @@ logger = logging.getLogger(__name__)
 
 
 class Runner:
-    _subst_regex = re.compile(r"\${((([^{][^}]*)})|{)")
-    _full_subst_regex = re.compile(r"^\${([^{][^}]*)}$")
+    """
+    This class is responsible for executing scripts and workflows.
+    """
+
+    # The regex for substituting variables in strings.
+    # A dollar sign means nothing unless it is followed by an opening brace
+    # and preceded by an even number of dollar signs.
+    _subst_regex = re.compile(r"(\$+)\{([^}]*)\}")
+    # The regex for substituting variables as actual values without string interpolation.
+    _full_subst_regex = re.compile(r"^\$\{([^}]*)\}$")
 
     def __init__(self, base_path: str):
         self.base_path = base_path
@@ -52,9 +60,11 @@ class Runner:
             return self._substitute_eval(m.group(1), inputs)
 
         def subst(match):
-            if match.group(1) == "{":
-                return match.group(0)
-            return str(self._substitute_eval(match.group(3), inputs))
+            escape_len = len(match.group(1))
+            prefix = "$" * (escape_len // 2)
+            if escape_len % 2 == 0:
+                return prefix + "{" + match.group(2) + "}"
+            return prefix + str(self._substitute_eval(match.group(2), inputs))
 
         return self._subst_regex.sub(subst, s)
 

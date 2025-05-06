@@ -4,6 +4,8 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+## [0.1.8]
+
 ### Added
 
 - Add `exists`, `isfile`, and `isdir` condition helpers

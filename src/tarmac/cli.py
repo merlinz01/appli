@@ -58,6 +58,7 @@ def main(args=None):
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         default="INFO",
         help="Set the logging level",
+        type=lambda x: x.upper(),
     )
     parser.add_argument(
         "-o",
@@ -193,7 +194,7 @@ def main(args=None):
                     file.write(type_colors.get(type(item), colors[None]))
                     print_object_text(item, indent + 2, file, colors)
                     file.write(colors[None])
-        else:
+        else:  # pragma: no cover
             file.write(" " * indent)
             file.write(colors["red"])
             file.write(repr(obj))

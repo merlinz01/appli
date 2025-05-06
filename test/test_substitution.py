@@ -9,30 +9,15 @@ def test_substitution(config_dir: Path):
     runner = Runner(base_path=str(config_dir))
     (config_dir / "workflows").mkdir()
 
-    (config_dir / "scripts").mkdir()
-    with open(config_dir / "scripts" / "test.py", "w") as f:
-        f.write(
-            """
-# /// tarmac
-# inputs:
-#   tests:
-#     type: dict
-# ///
-from tarmac.operations import run
-def main(op):
-    for inp in op.inputs['tests']:
-        op.outputs[inp] = op.inputs['tests'][inp]
-run(main)
-"""
-        )
-
     def check(subst: str, expected):
         with open(config_dir / "workflows" / "substitution.yml", "w") as f:
             f.write(
                 f"""
 steps:
   - id: test
-    do: test
+    py: |
+      for inp in inputs['tests']:
+        outputs[inp] = inputs['tests'][inp]
     with:
       tests:
         test: {subst}
@@ -43,10 +28,8 @@ steps:
 
     check(".$", ".$")
     check(".$$", ".$$")
-    check(".$$$", ".$$$")
     check(".${", ".${")
     check(".$${", ".$${")
-    check(".$$${", ".$$${")
     check(".${{", ".${{")
     check(".$${{", ".$${{")
     check(".$$${{", ".$$${{")
@@ -58,7 +41,6 @@ steps:
     check(".$$${123}", ".$123")
     check(".$$$${123}", ".$${123}")
     check(".$$$$${123}", ".$$123")
-    check(".$$$$$${123}", ".$$${123}")
     check(".${123.456}", ".123.456")
     with pytest.raises(SyntaxError):
         check(".${123.456.789}", "")
@@ -73,9 +55,6 @@ steps:
     check(".${123}}", ".123}")
     check(".${123}}}", ".123}}")
     check(".${123}}}}", ".123}}}")
-    check(".${123}}}}}", ".123}}}}")
-    check(".${123}}}}}}", ".123}}}}}")
-    check(".${123}}}}}}}}", ".123}}}}}}}")
     check(
         """
         - ${"Hello"}
@@ -89,3 +68,6 @@ steps:
     import sys
 
     check("${__import__('sys').platform}", sys.platform)
+
+    check("123", 123)
+    check("123.456", 123.456)

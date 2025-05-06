@@ -138,17 +138,28 @@ class Metadata(BaseModel):
             return str(value)
         if type_ == "int":
             if isinstance(value, str):
-                return int(value)
+                try:
+                    return int(value)
+                except ValueError:
+                    raise ValueError(f"Input {name} must be an integer")
             if not isinstance(value, int):
                 raise ValueError(f"Input {name} must be an integer")
             return value
         if type_ == "float":
+            if isinstance(value, str):
+                try:
+                    return float(value)
+                except ValueError:
+                    raise ValueError(f"Input {name} must be a float")
             if not isinstance(value, (float, int)):
                 raise ValueError(f"Input {name} must be a float")
             return float(value)
         if type_ == "bool":
             if isinstance(value, str):
-                return value.lower() in ("true", "1")
+                if value.lower() in ("true", "1"):
+                    return True
+                elif value.lower() in ("false", "0"):
+                    return False
             if not isinstance(value, bool):
                 raise ValueError(f"Input {name} must be a boolean")
             return value
@@ -160,7 +171,7 @@ class Metadata(BaseModel):
             if not isinstance(value, dict):
                 raise ValueError(f"Input {name} must be a dict")
             return value
-        raise ValueError(f"Invalid input type: {type_}")
+        raise ValueError(f"Invalid input type: {type_}")  # pragma: no cover
 
 
 class ScriptMetadata(Metadata):
@@ -215,7 +226,7 @@ class WorkflowStep(BaseModel):
     """
     The type of the workflow step.
     Can be one of: script, workflow, shell.
-    If not provided, the type will be set based on the presence of the `do`, `run`, or `workflow` fields.
+    The type will be set based on the presence of the `do`, `run`, or `workflow` fields.
     """
 
     name: str = ""
@@ -269,6 +280,10 @@ class WorkflowStep(BaseModel):
             self.id = self.name
 
     def validate_workflow_type(self):
+        if self.type is not None:
+            raise ValueError(
+                "Do not set `type` manually, use the relevant parameter instead"
+            )
         if self.do is not None:
             if self.run is not None:
                 raise ValueError("Cannot use `run` with `do`")

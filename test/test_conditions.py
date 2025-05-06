@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 
 def test_conditions(config_dir: Path):
     from tarmac.runner import Runner
@@ -105,3 +107,32 @@ steps:
     assert outputs["steps"]["step19"]["succeeded"] is None
     assert outputs["steps"]["step20"]["succeeded"] is True
     assert outputs["succeeded"] is True
+
+
+def test_invalid_condition_type(config_dir: Path):
+    from tarmac.runner import Runner
+
+    runner = Runner(base_path=str(config_dir))
+    (config_dir / "workflows").mkdir()
+    with open(config_dir / "workflows" / "invalid_condition.yml", "w") as f:
+        f.write(
+            """
+steps:
+  - id: step1
+    py: print("true")
+    if: 12345
+"""
+        )
+    with pytest.raises(ValueError, match="Invalid condition type"):
+        runner.execute_workflow("invalid_condition", {})
+    with open(config_dir / "workflows" / "invalid_condition.yml", "w") as f:
+        f.write(
+            """
+steps:
+  - id: step1
+    py: print("true")
+    if: ["one", "two", "three"]
+"""
+        )
+    with pytest.raises(ValueError, match="Invalid condition type"):
+        runner.execute_workflow("invalid_condition", {})

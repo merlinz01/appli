@@ -77,7 +77,7 @@ class Runner:
             with open(filename) as f:
                 metadata = ScriptMetadata.load(f.read())
         except FileNotFoundError as e:
-            raise ValueError(f"script {name} not found") from e
+            raise ValueError(f"Script {name} not found") from e
         inputs = metadata.validate_inputs(inputs)
         with (
             tempfile.NamedTemporaryFile(mode="wb") as inputs_file,
@@ -85,7 +85,7 @@ class Runner:
         ):
             with_tarmac = ["--with", "tarmac"]
             if os.environ.get("TARMAC_EDITABLE_INSTALL"):
-                with_tarmac = ["--with-editable", "."]
+                with_tarmac = ["--with-editable", "."]  # pragma: no cover
             cmd = [
                 self._find_uv_bin(),
                 "run",
@@ -249,7 +249,7 @@ class Runner:
                 assert step.workflow is not None
                 out = self.execute_workflow(step.workflow, step.params)
             else:
-                raise ValueError("unknown step type")
+                raise ValueError("unknown step type")  # pragma: no cover
 
         assert isinstance(outputs["steps"], dict)
         assert step.id is not None

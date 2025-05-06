@@ -11,3 +11,5 @@ wheels/
 
 .vscode/
 /.*_cache/
+.coverage*
+htmlcov/

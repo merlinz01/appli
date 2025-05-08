@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
+from pathlib import Path
 from typing import Any
 
 import dotmap
@@ -30,8 +31,10 @@ class Runner:
     # The regex for substituting variables as actual values without string interpolation.
     _full_subst_regex = re.compile(r"^\$\{([^}]*)\}$")
 
-    def __init__(self, base_path: str):
-        self.base_path = base_path
+    def __init__(self, base_path: str | Path):
+        self.base_path = Path(base_path)
+        if not self.base_path.is_dir():
+            raise ValueError(f"Base path {base_path} is not a directory")
         self._uv_bin = None
 
     def _find_uv_bin(self):
@@ -39,11 +42,11 @@ class Runner:
             self._uv_bin = find_uv_bin()
         return self._uv_bin
 
-    def _get_workflow_filename(self, name: str) -> str:
-        return os.path.join(self.base_path, "workflows", name + ".yml")
+    def _get_workflow_filename(self, name: str) -> Path:
+        return self.base_path / "workflows" / (name + ".yml")
 
-    def _get_script_filename(self, name: str) -> str:
-        return os.path.join(self.base_path, "scripts", name + ".py")
+    def _get_script_filename(self, name: str) -> Path:
+        return self.base_path / "scripts" / (name + ".py")
 
     def _substitute(self, v: Any, inputs: ValueMapping) -> Any:
         if isinstance(v, str):
@@ -100,7 +103,7 @@ class Runner:
                 "--script",
             ]
             cmd.extend(metadata.additional_uv_args)
-            cmd.append(filename)
+            cmd.append(str(filename))
             os.chmod(inputs_file.name, 0o600)
             os.chmod(outputs_file.name, 0o600)
             inputs_file.write(json.dumps(inputs).encode("utf-8"))

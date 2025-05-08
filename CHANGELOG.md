@@ -4,6 +4,10 @@ This is the changelog for Tarmac.
 
 ## [Unreleased]
 
+### Added
+
+- Accept `pathlib.Path` objects for `Runner.base_path`
+
 ## [0.1.8]
 
 ### Added

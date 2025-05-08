@@ -8,6 +8,9 @@ def test_create_runner(config_dir: Path):
 
     Runner(base_path=str(config_dir))
 
+    with pytest.raises(ValueError, match="Base path .* is not a directory"):
+        Runner(base_path=str(config_dir / "nonexistent"))
+
 
 def test_run_empty_workflow(config_dir: Path):
     from tarmac.runner import Runner

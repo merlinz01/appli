@@ -8,6 +8,10 @@ This is the changelog for Tarmac.
 
 - Accept `pathlib.Path` objects for `Runner.base_path`
 
+### Changed
+
+- Use `before_each` and `after_each` workflow arguments instead of class method
+
 ## [0.1.8]
 
 ### Added

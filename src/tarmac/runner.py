@@ -7,7 +7,7 @@ import sys
 import tempfile
 import traceback
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, TypeAlias
 
 import dotmap
 from uv import find_uv_bin
@@ -17,6 +17,8 @@ from tarmac.operations import Failure
 from .metadata import ScriptMetadata, ValueMapping, WorkflowMetadata, WorkflowStep
 
 logger = logging.getLogger(__name__)
+
+WorkflowCallback: TypeAlias = Callable[[WorkflowStep, ValueMapping], None]
 
 
 class Runner:
@@ -207,7 +209,13 @@ class Runner:
         out.setdefault("succeeded", True)
         return out
 
-    def execute_workflow(self, name: str, inputs: ValueMapping) -> ValueMapping:
+    def execute_workflow(
+        self,
+        name: str,
+        inputs: ValueMapping,
+        before_each: WorkflowCallback | None = None,
+        after_each: WorkflowCallback | None = None,
+    ) -> ValueMapping:
         filename = self._get_workflow_filename(name)
         try:
             with open(filename) as f:
@@ -221,7 +229,9 @@ class Runner:
         outputs["succeeded"] = True
         outputs["steps"] = {}
         for step in metadata.steps:
-            out = self.execute_workflow_step(step, inputs, outputs)
+            out = self.execute_workflow_step(
+                step, inputs, outputs, before_each, after_each
+            )
             succeeded = out.get("succeeded", True)
             if succeeded is not None and not succeeded:
                 outputs["succeeded"] = False
@@ -229,16 +239,21 @@ class Runner:
         return outputs
 
     def execute_workflow_step(
-        self, step: WorkflowStep, inputs: ValueMapping, outputs: ValueMapping
+        self,
+        step: WorkflowStep,
+        inputs: ValueMapping,
+        outputs: ValueMapping,
+        before_each: WorkflowCallback | None = None,
+        after_each: WorkflowCallback | None = None,
     ) -> ValueMapping:
+        step.params = {k: self._substitute(v, inputs) for k, v in step.params.items()}
+        if before_each:
+            before_each(step, step.params)
         if step.condition is not None and not self.evaluate_condition(
             step.condition, inputs, outputs
         ):
             out = {"succeeded": None}
         else:
-            step.params = {
-                k: self._substitute(v, inputs) for k, v in step.params.items()
-            }
             if step.type == "script":
                 assert step.do is not None
                 out = self.execute_script(step.do, step.params)
@@ -250,14 +265,17 @@ class Runner:
                 out = self.execute_python(step.py, step.params, outputs["steps"])
             elif step.type == "workflow":
                 assert step.workflow is not None
-                out = self.execute_workflow(step.workflow, step.params)
+                out = self.execute_workflow(
+                    step.workflow, step.params, before_each, after_each
+                )
             else:
                 raise ValueError("unknown step type")  # pragma: no cover
 
         assert isinstance(outputs["steps"], dict)
         assert step.id is not None
         outputs["steps"][step.id] = out
-        self.workflow_step_hook(step, out)
+        if after_each:
+            after_each(step, out)
         return out
 
     def evaluate_condition(
@@ -290,11 +308,3 @@ class Runner:
         }
         code = compile(f"({cond})", "<condition>", "eval")
         return bool(eval(code, env, {}))
-
-    def workflow_step_hook(self, step: WorkflowStep, outputs: ValueMapping) -> None:
-        """
-        This method is called after each workflow step is executed.
-        It can be used by subclasses to perform additional actions, such as logging or
-        notifying the user.
-        """
-        logger.info(f"Step {step.name or step.id or '<unnamed>'} executed")

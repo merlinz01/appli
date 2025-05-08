@@ -2,6 +2,8 @@ from pathlib import Path
 
 import pytest
 
+from tarmac.metadata import ValueMapping, WorkflowStep
+
 
 def test_workflow_step_run_type(config_dir: Path):
     from tarmac.runner import Runner
@@ -416,3 +418,50 @@ def test_invalid_workflow_type(config_dir: Path):
         match="Must have either `do`, `run`, `py`, or `workflow`",
     ):
         runner.execute_workflow("workflow", {})
+
+
+def test_workflow_callbacks(config_dir: Path):
+    from tarmac.runner import Runner
+
+    runner = Runner(base_path=str(config_dir))
+    (config_dir / "workflows").mkdir()
+    with open(config_dir / "workflows" / "workflow.yml", "w") as f:
+        f.write(
+            """
+            steps:
+              - name: step1
+                py: outputs['test'] = inputs['test']
+                with:
+                  test: "Hello, World!"
+            """
+        )
+
+    before_called = 0
+    after_called = 0
+
+    def before_each(step: WorkflowStep, inputs: ValueMapping):
+        assert step.name == "step1"
+        assert inputs["test"] == "Hello, World!"
+        nonlocal before_called
+        before_called += 1
+
+    def after_each(step: WorkflowStep, outputs: ValueMapping):
+        assert step.name == "step1"
+        assert outputs["test"] == "Hello, World!"
+        nonlocal after_called
+        after_called += 1
+
+    outputs = runner.execute_workflow(
+        "workflow", {}, before_each=before_each, after_each=after_each
+    )
+    assert outputs == {
+        "steps": {
+            "step1": {
+                "succeeded": True,
+                "test": "Hello, World!",
+            }
+        },
+        "succeeded": True,
+    }
+    assert before_called == 1
+    assert after_called == 1

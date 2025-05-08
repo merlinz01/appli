@@ -1,6 +1,6 @@
 [project]
 name = "tarmac"
-version = "0.1.8"
+version = "0.1.9"
 description = "Reliable deployments, repeatable workflows"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
